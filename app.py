@@ -28,7 +28,7 @@ def verify():
 
 def preprocess(message, speaker):
     punct = '!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\\n\\t\'‘’“”’–—'
-    text = speaker + ':' + message.lower() + ('' if message[-1] in '?!.' else '.')
+    text = speaker + ':' + message.lower() + ('' if message and message[-1] in '?!.' else '.')
     text = re.sub('([{}])'.format(punct), r' \1 ', text)
     return ' '.join(text.split())
 
@@ -44,7 +44,10 @@ def generate(conversation):
 
     response = re.sub(' ([{}]) '.format(punct), r'\1 ', response)
     response = re.sub("' (t|s|d|m|re|ve|ll)([\s{}])".format(punct), r"'\1\2", response)
-    return response.strip() if response.strip() else '...'
+    response = response.strip() if response.strip() else '...'
+    if ':' in response:
+        response = response.split(':')[0].rsplit(' ', 1)[0]
+    return response
 
 
 @app.route('/', methods=['POST'])

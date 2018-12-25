@@ -35,12 +35,12 @@ const sendMessage = (text, url) => {
   });
 };
 
-document.onkeydown = e => {
+document.addEventListener('keydown', e => {
   input.focus();
-  if (e.keyCode != 13) return;
+  if (e.code != 'Enter') return;
   addMessage(input.value, true);
   sendMessage(input.value, '/chat');
   input.value = '';
-};
+});
 
 addMessage('hey, what\'s up?', false);

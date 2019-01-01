@@ -3,6 +3,7 @@ import requests, os
 
 # scrape rooster tooths for RvB scripts
 PATH = 'scripts.txt'
+CONVERSATION = False
 
 with open(PATH, 'w') as f:
     for i in [x for x in range(347)]:
@@ -26,13 +27,19 @@ for line in text.split('\n'):
         else:
             line = line.split(':',1)[0].upper() + ':' + line.split(':',1)[1].lower()
         lines.append(line)
+    elif not CONVERSATION:
+        lines.append(line)
+
+if CONVERSATION:
+    line_groups = []
+    for group in zip(lines, lines[1:], lines[2:]):
+        line_groups.append(' '.join(group))
+    text = '\n'.join(line_groups)
+else:
+    text = '\n'.join(lines)
 
 replacemap = {"\x91": '"', "\x93": '"', "\x92": "'", "\x94": "'",
-              '[': '(', ']': ')', '\x85': '\n', '\xa0': ' ', '\x96': ''}
-line_groups = []
-for group in zip(lines, lines[1:], lines[2:]):
-    line_groups.append(' '.join(group))
-text = '\n'.join(line_groups)
+    '[': '(', ']': ')', '\x85': '\n', '\xa0': ' ', '\x96': ''}
 for k, v in replacemap.items():
     text = text.replace(k, v)
 

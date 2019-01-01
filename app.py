@@ -37,7 +37,8 @@ def generate(conversation):
     punct = '!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\\n\\t\'‘’“”’–—'
     prefix = ' '.join(conversation) + ' grif : '
 
-    response = model.generate(temperature=0.8, prefix=prefix, return_as_list=True)[0]
+    temp = [0.8, 0.4, 0.2, 0.2]
+    response = model.generate(temperature=temp, prefix=prefix, return_as_list=True)[0]
     response = response[len(prefix):] + ' '
     conversation.append('grif : ' + response[:-1])
     del conversation[:-1]

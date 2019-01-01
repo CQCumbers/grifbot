@@ -13,7 +13,7 @@ else:
     model = textgenrnn(name='model')
 
 model.train_from_file(
-    'scripts.txt',
+    'dialogue.txt',
     num_epochs=500,
     new_model=new_model,
     word_level=True,

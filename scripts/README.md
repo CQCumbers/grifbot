@@ -22,4 +22,4 @@ If you're interested in generating your own scripts, the easiest method is proba
 > WASHINGTON:It's okay Caboose... I'm not our leader. I don't know what to say?\
 > DONUT:Me? We could only hate as a window.
 
-See `gen_script.txt` for a complete generated episode.
+See `gen_script.txt` for a complete generated episode. A GPT-2 based script and sample episode is also provided, though the model weights are too large to include.

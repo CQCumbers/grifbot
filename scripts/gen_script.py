@@ -8,12 +8,10 @@ model = textgenrnn(
 )
 
 # generate episodes
-temperature = [1.0, 0.5, 0.2, 0.2]   
 prefix = '\n\nRed vs. Blue Season 17\nEpiso'
 
 model.generate_to_file(
     'gen_script.txt',
-    temperature=temperature,
     prefix=prefix, n=1,
     max_gen_length=15000
 )

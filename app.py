@@ -15,30 +15,18 @@ model = textgenrnn(
     config_path='model_config.json',
 )
 speakers = ['sarge', 'simmons', 'tucker', 'caboose', 'donut']
-
-
-@app.route('/', methods=['GET'])
-def verify():
-    if request.args.get('hub.mode') == 'subscribe' and request.args.get('hub.challenge'):
-        if not request.args.get('hub.verify_token') == app.config['VERIFY_TOKEN']:
-            return 'Verification token mismatch', 403
-        return request.args['hub.challenge']
-    return 'Improper verification request'
+punct = '!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\\n\\t\'‘’“”’–—'
 
 
 def preprocess(message, speaker):
-    punct = '!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\\n\\t\'‘’“”’–—'
     text = speaker + ':' + message.lower() + ('' if message and message[-1] in '?!.' else '.')
     text = re.sub('([{}])'.format(punct), r' \1 ', text)
     return ' '.join(text.split())
 
 
 def generate(conversation):
-    punct = '!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\\n\\t\'‘’“”’–—'
     prefix = ' '.join(conversation) + ' grif : '
-
-    temp = [0.8, 0.4, 0.2, 0.2]
-    response = model.generate(temperature=temp, prefix=prefix, return_as_list=True)[0]
+    response = model.generate(prefix=prefix, return_as_list=True)[0]
     response = response[len(prefix):] + ' '
     conversation.append('grif : ' + response[:-1])
     del conversation[:-1]
@@ -51,36 +39,7 @@ def generate(conversation):
     return response
 
 
-@app.route('/', methods=['POST'])
-def webhook():
-    for sender, message in messaging_events(request.get_json()):
-        # get conversation history from cache
-        print('Message from {0}: {1}'.format(sender, message))
-        try:
-            speaker, conversation = json.loads(cache.get(sender))
-        except Exception as e:
-            speaker = random.choice(speakers)
-            conversation = ['grif : hey , what \' s up ?']
-        message = preprocess(message, speaker)
-        if conversation and conversation[-1] == message: continue
-        conversation.append(message)
-        
-        # send and cache model response
-        response = generate(conversation)
-        print('Response to {0}: {1}'.format(sender, response))
-        cache.set(sender, json.dumps([speaker, conversation]))
-        send_message(sender, response)
-    return 'OK'
-
-
-@app.route('/chat', methods=['GET', 'POST'])
-def chat():
-    # return webpage on GET request
-    if request.method == 'GET':
-        return app.send_static_file('index.html')
-
-    sender = request.get_json()['id']
-    message = request.get_json()['text']
+def respond(sender, message):
     # get conversation history from cache
     print('Message from {0}: {1}'.format(sender, message))
     try:
@@ -95,6 +54,35 @@ def chat():
     response = generate(conversation)
     print('Response to {0}: {1}'.format(sender, response))
     cache.set(sender, json.dumps([speaker, conversation]))
+    return response
+
+
+@app.route('/', methods=['GET'])
+def verify():
+    if request.args.get('hub.mode') == 'subscribe' and request.args.get('hub.challenge'):
+        if not request.args.get('hub.verify_token') == app.config['VERIFY_TOKEN']:
+            return 'Verification token mismatch', 403
+        return request.args['hub.challenge']
+    return 'Improper verification request'
+
+
+@app.route('/', methods=['POST'])
+def webhook():
+    for sender, message in messaging_events(request.get_json()):
+        response = respond(sender, message)
+        send_message(sender, response)
+    return 'OK'
+
+
+@app.route('/chat', methods=['GET', 'POST'])
+def chat():
+    # return webpage on GET request
+    if request.method == 'GET':
+        return app.send_static_file('index.html')
+
+    sender = request.get_json()['id']
+    message = request.get_json()['text']
+    response = respond(sender, message)
     return jsonify({'text': response})
 
 

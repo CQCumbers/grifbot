@@ -53,7 +53,7 @@ def respond(sender, message):
     # send and cache model response
     response = generate(conversation)
     print('Response to {0}: {1}'.format(sender, response))
-    cache.set(sender, json.dumps([speaker, conversation]))
+    cache.set(sender, json.dumps([speaker, conversation]), ex=86400)
     return response
 
 

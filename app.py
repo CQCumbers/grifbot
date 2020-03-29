@@ -57,7 +57,7 @@ def respond(sender, message):
     return response
 
 
-@app.route('/', methods=['GET'])
+@app.route('/hook', methods=['GET'])
 def verify():
     if request.args.get('hub.mode') == 'subscribe' and request.args.get('hub.challenge'):
         if not request.args.get('hub.verify_token') == app.config['VERIFY_TOKEN']:
@@ -66,7 +66,7 @@ def verify():
     return 'Improper verification request'
 
 
-@app.route('/', methods=['POST'])
+@app.route('/hook', methods=['POST'])
 def webhook():
     for sender, message in messaging_events(request.get_json()):
         response = respond(sender, message)
@@ -74,7 +74,7 @@ def webhook():
     return 'OK'
 
 
-@app.route('/chat', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def chat():
     # return webpage on GET request
     if request.method == 'GET':
@@ -95,9 +95,10 @@ def messaging_events(data):
 
 def send_message(recipient, message):
     requests.post(
-        'https://graph.facebook.com/v3.1/me/messages',
+        'https://graph.facebook.com/v6.0/me/messages',
         params={'access_token': app.config['PAGE_ACCESS_TOKEN']},
         json={
+            'messaging_type': 'RESPONSE',
             'recipient': {'id': recipient},
             'message': {'text': message}
         }

@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 redis = "*"
 keras = "*"
-tensorflow = "*"
 flask = "*"
 gunicorn = "*"
+tensorflow = "*"
 textgenrnn = "*"
 requests = "*"
 

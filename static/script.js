@@ -39,7 +39,7 @@ document.addEventListener('keydown', e => {
   input.focus();
   if (e.code != 'Enter') return;
   addMessage(input.value, true);
-  sendMessage(input.value, '/chat');
+  sendMessage(input.value, '/');
   input.value = '';
 });
 
